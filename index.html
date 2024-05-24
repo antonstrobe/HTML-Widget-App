@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <title>Your Electron App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles2.css">
+</head>
+<body>
+    <div id="fixed_area" style="display: flex; justify-content: space-around;">
+        <div>
+            <button id="reload" class="btn btn-primary">Reload</button>
+            <button id="copy_rel" class="btn btn-secondary">Copy</button>
+            <button id="push" class="btn btn-secondary">Push</button>
+            <textarea id="additionalText" placeholder="Add extra words here" class="form-control" rows="3"></textarea>
+            <div id="keyboard_layout" style="text-align: center; font-size: 20px;"></div>
+            <table>
+                <tr>
+                    <td>
+                        <div id="file_list"></div>
+                        <div id="drop_zone">Перетащите файлы сюда</div>
+                    </td>
+                    <td>
+                        <div id="folder_list"></div>
+                        <div id="drop_zone_folder">Перетащите папки сюда</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div id="file_info"></div>
+    <script>
+        const { ipcRenderer } = require('electron');
+        var dropZone = document.getElementById('drop_zone');
+        var dropZoneFolder = document.getElementById('drop_zone_folder');
+        var fileInfo = document.getElementById('file_info');
+        var fileList = document.getElementById('file_list');
+        var folderList = document.getElementById('folder_list');
+        var reloadButton = document.getElementById('reload');
+        var copyRelButton = document.getElementById('copy_rel');
+        var pushButton = document.getElementById('push');
+        var additionalTextInput = document.getElementById('additionalText');
+        var keyboardLayoutDisplay = document.getElementById('keyboard_layout');
+        var bodyElement = document.body;
+        var addedFiles = [];
+        var folderTree = [];
+        dropZone.ondragover = dropZoneFolder.ondragover = function (event) {
+            event.preventDefault();
+            this.style.backgroundColor = '#eee';
+        };
+        dropZone.ondragleave = dropZoneFolder.ondragleave = function () {
+            this.style.backgroundColor = 'transparent';
+        };
+        dropZone.ondrop = function (event) {
+            event.preventDefault();
+            this.style.backgroundColor = 'transparent';
+            handleFiles(event.dataTransfer.files);
+        };
+        dropZoneFolder.ondrop = function (event) {
+            event.preventDefault();
+            this.style.backgroundColor = 'transparent';
+            handleFolders(event.dataTransfer.items);
+        };
+        reloadButton.onclick = function () {
+            location.reload();
+        };
+        copyRelButton.onclick = function () {
+            const appendedText = fileInfo.innerText + folderList.innerText + additionalTextInput.value + "\nНапиши код целиком и без комментариев\n";
+            navigator.clipboard.writeText(appendedText);
+            if (additionalTextInput.value.trim() !== '') {
+                const now = new Date();
+                const formattedDateTime = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()} - ${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
+                const fileName = `save_${formattedDateTime}.txt`;
+                ipcRenderer.send('save-file', { filename: fileName, content: appendedText });
+                setTimeout(function () {
+                    location.reload();
+                }, 1000);
+            }
+        };
+        pushButton.onclick = function () {
+            const appendedText = fileInfo.innerText + "\n" + folderList.innerText + "\n" + additionalTextInput.value + "\nНапиши код целиком и без комментариев\n";
+            ipcRenderer.send('push-content', { content: appendedText });
+            ipcRenderer.send('activate-web-window');
+        };
+        additionalTextInput.addEventListener('keydown', function (event) {
+            if (event.key.length === 1) {
+                if (/[а-яА-Я]/.test(event.key)) {
+                    keyboardLayoutDisplay.textContent = 'рус';
+                    bodyElement.style.backgroundColor = '#4CAF5050';
+                } else if (/[a-zA-Z]/.test(event.key)) {
+                    keyboardLayoutDisplay.textContent = 'eng';
+                    bodyElement.style.backgroundColor = '#2196F350';
+                }
+            }
+        });
+        function handleFiles(files) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (!addedFiles.includes(file.name)) {
+                    var reader = new FileReader();
+                    reader.onload = (function (theFile) {
+                        return function (e) {
+                            var div = document.createElement('div');
+                            div.innerHTML = '<strong>' + theFile.name + '</strong><br>' + '<pre>' + escapeHtml(e.target.result) + '</pre>';
+                            fileInfo.appendChild(div);
+                            var fileDiv = document.createElement('div');
+                            fileDiv.textContent = theFile.name;
+                            fileList.appendChild(fileDiv);
+                            addedFiles.push(theFile.name);
+                        };
+                    })(file);
+                    reader.readAsText(file);
+                }
+            }
+        }
+        function handleFolders(items) {
+            for (let item of items) {
+                if (item.kind === 'file' && item.webkitGetAsEntry().isDirectory) {
+                    const entry = item.webkitGetAsEntry();
+                    traverseFileTree(entry, entry.name);
+                }
+            }
+        }
+        function traverseFileTree(item, path) {
+            if (item.isFile) {
+                item.file(function (file) {
+                    var div = document.createElement('div');
+                    div.textContent = path + '/' + file.name;
+                    folderList.appendChild(div);
+                    folderTree.push(path + '/' + file.name);
+                });
+            } else if (item.isDirectory) {
+                var dirReader = item.createReader();
+                dirReader.readEntries(function (entries) {
+                    for (var i = 0; i < entries.length; i++) {
+                        traverseFileTree(entries[i], path + '/' + entries[i].name);
+                    }
+                });
+            }
+        }
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+        ipcRenderer.on('open-website', function (event, url) {
+            require('electron').shell.openExternal(url);
+        });
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = 'Toggle';
+            toggleButton.style.position = 'fixed';
+            toggleButton.style.top = '1px';
+            toggleButton.style.right = '1px';
+            toggleButton.addEventListener('click', () => {
+                const { ipcRenderer } = require('electron');
+                ipcRenderer.send('toggle-web-window-size');
+            });
+            document.body.appendChild(toggleButton);
+        });
+    </script>
+</body>
+</html>

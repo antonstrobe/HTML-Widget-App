@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'self';">
+    <title>Control Window</title>
+    <link rel="stylesheet" href="controls.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .button {
+            margin: 0 7px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            background-color: #000000;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="button-row">
+        <button id="save-pdf" class="button">Сохранить PDF</button>
+    </div>
+    <div class="button-row">
+        <button id="reload" class="button reload">Reload</button>
+        <button id="fullsize" class="button fullsize">Fullsize</button>
+        <button id="toggle" class="button toggle">Toggle</button>
+        <button id="restore" class="button restore" style="display:none;">Restore</button>
+    </div>
+    <div id="link-buttons-container"></div>
+    <script src="controls.js"></script>
+</body>
+</html>

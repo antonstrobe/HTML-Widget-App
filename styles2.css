@@ -1,0 +1,76 @@
+html, body {
+  overflow: hidden; 
+  height: 100%;
+}
+body {
+  background-color: #000000;
+  color: rgb(105, 105, 105);
+  margin: 0;
+  font-size: calc(10px); 
+}
+#fixed_area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #000000;
+  color: rgb(88, 88, 88);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+#drop_zone, #drop_zone_folder, #drop_zone_combined {
+  border: 2px dashed #525252;
+  border-radius: 5px;
+  padding: 1%;
+  text-align: center;
+  margin-top: 5px; 
+  min-height: 100px;
+}
+#additionalText {
+  color: rgb(170, 170, 170);
+  background-color: #42424279;
+  margin-top: 1%;
+}
+#file_list, #folder_list, #combined_list {
+  color: rgb(255, 255, 255);
+  margin-top: 1%;
+  font-size: calc(13px); 
+}
+#file_info {
+  margin-top: 4px;
+  color: rgb(214, 214, 214);
+  overflow-y: auto; 
+  cursor: pointer;
+}
+.btn, .form-control {
+  background-color: #00000080;
+  border: none; 
+  padding: 1%;
+  margin-bottom: 1%; 
+  margin-right: 5%; 
+  cursor: pointer;
+}
+strong, pre {
+  color: rgb(0, 0, 0);
+}
+.form-control {
+  background-color: #000000;
+  color: #000000;
+  border: 1px solid #555;
+}
+table {
+  width: 100%;
+}
+td {
+  padding: 1px;
+}
+.button {
+  margin: 0 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.reload, .toggle, .fullsize, .restore {
+  background-color: #000000;
+  color: white;
+}
