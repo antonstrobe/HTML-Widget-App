@@ -7,7 +7,7 @@ HTML Widget App - это приложение, разработанное с и�
 1. [Node.js](https://nodejs.org/) и [npm](https://www.npmjs.com/get-npm).
 2. Склонируйте репозиторий:
     ```sh
-    git clone https://github.com/username/repository.git
+    git clone [https://github.com/username/repository.git](https://github.com/antonstrobe/HTML-Widget-App.git)
     cd repository
     ```
 3. Установите зависимости:
