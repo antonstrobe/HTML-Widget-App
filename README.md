@@ -4,7 +4,7 @@ HTML Widget App - это приложение, разработанное с и�
 
 ## Установка
 
-1. Убедитесь, что у вас установлен [Node.js](https://nodejs.org/) и [npm](https://www.npmjs.com/get-npm).
+1. [Node.js](https://nodejs.org/) и [npm](https://www.npmjs.com/get-npm).
 2. Склонируйте репозиторий:
     ```sh
     git clone https://github.com/username/repository.git
